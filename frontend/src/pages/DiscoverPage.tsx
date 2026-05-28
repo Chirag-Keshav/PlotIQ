@@ -43,8 +43,13 @@ export default function DiscoverPage() {
             ) : listings.length > 0 ? (
               <>
                 <p className="text-xs text-white/30 px-1">{listings.length} plot{listings.length !== 1 ? "s" : ""} found</p>
-                {listings.map((listing: any) => (
-                  <ListingCard key={listing.id} listing={listing} />
+                {listings.map((listing: any, i: number) => (
+                  <div
+                    key={listing.id}
+                    style={{ animation: `stagger-in 0.4s ease-out ${i * 0.05}s both` }}
+                  >
+                    <ListingCard listing={listing} />
+                  </div>
                 ))}
               </>
             ) : (

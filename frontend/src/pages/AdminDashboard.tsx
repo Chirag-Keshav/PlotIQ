@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "motion/react";
 import api from "../lib/api";
 import Navbar from "../components/Navbar";
 import { CheckCircle2, XCircle, FileQuestion, ShieldX, AlertTriangle } from "lucide-react";
@@ -60,11 +61,22 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-black text-white">
       <Navbar />
       <div className="max-w-6xl mx-auto px-6 pt-28 pb-16 space-y-8">
-        <h1 className="text-3xl font-bold">Admin Trust Dashboard</h1>
+        <motion.h1
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold"
+        >
+          Admin Trust Dashboard
+        </motion.h1>
 
         {/* Metrics panel */}
         {metricsData && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"
+          >
             {[
               { label: "Total Listings", value: metricsData.total_listings },
               { label: "Live", value: metricsData.live_listings },
@@ -83,7 +95,7 @@ export default function AdminDashboard() {
                 <p className="text-xs text-white/40 mt-1">{label}</p>
               </div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Verification queue */}

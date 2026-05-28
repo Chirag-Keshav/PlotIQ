@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import { School, Building2, ShoppingBag, Train, Route, Bus } from "lucide-react";
-import DisclaimerBanner from "../../ui/DisclaimerBanner";
 
 interface POI {
   name: string;
