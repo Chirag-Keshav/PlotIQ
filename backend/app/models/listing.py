@@ -153,7 +153,7 @@ class AuditLog(Base):
     action_type = Column(String(50), nullable=False)  # document_access/listing_create/admin_approve/etc.
     target_type = Column(String(50), nullable=True)  # listing/document/user
     target_id = Column(UUID(as_uuid=True), nullable=True)
-    metadata = Column(JSONB, nullable=True)
+    action_metadata = Column(JSONB, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="audit_logs")

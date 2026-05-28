@@ -36,14 +36,7 @@ class ListingCreate(BaseModel):
     use_type: Literal["residential", "commercial", "agricultural"]
     road_access: Literal["40ft", "60ft", "100ft", "highway", "none"]
     ownership_type: Literal["individual", "joint", "company"]
-    tos_accepted: bool  # must be True, else HTTP 400
-
-    @field_validator("tos_accepted")
-    @classmethod
-    def tos_must_be_accepted(cls, v: bool) -> bool:
-        if not v:
-            raise ValueError("Terms of Service must be accepted")
-        return v
+    tos_accepted: bool  # must be True; route handler returns HTTP 400 if False
 
 
 class ListingSummary(BaseModel):
