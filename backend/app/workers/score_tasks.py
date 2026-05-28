@@ -1,16 +1,31 @@
+"""Celery task — asynchronous confidence score computation."""
 import uuid
 import asyncio
-from typing import Optional
+import logging
+
 from app.workers.celery_app import celery_app
 from app.core.database import AsyncSessionLocal
-from app.services.listing_service import ListingService
 
-@celery_app.task(name="compute_confidence_score")
-def compute_confidence_score_task(listing_id_str: str):
-    """Celery task to compute the confidence score asynchronously."""
+logger = logging.getLogger(__name__)
+
+
+@celery_app.task(
+    name="compute_confidence_score",
+    bind=True,
+    autoretry_for=(Exception,),
+    max_retries=3,
+    default_retry_delay=30,
+)
+def compute_confidence_score_task(self, listing_id_str: str):
+    """Compute and store confidence score for a listing asynchronously."""
     async def _run():
         async with AsyncSessionLocal() as db:
+            from app.services.listing_service import ListingService
             service = ListingService(db)
             await service.recompute_score(uuid.UUID(listing_id_str))
-            
-    asyncio.run(_run())
+
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        logger.error(f"Score computation failed for {listing_id_str}: {exc}")
+        raise

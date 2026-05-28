@@ -2,6 +2,7 @@
 import logging
 import time
 from contextlib import asynccontextmanager
+from collections import defaultdict
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +10,12 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.database import check_database_connection
+
+# In-memory sliding window rate limiter (per IP, 60 req/min)
+# For multi-process deployments replace with Redis INCR + EXPIRE
+_rate_buckets: dict[str, list[float]] = defaultdict(list)
+RATE_LIMIT_MAX = 60
+RATE_LIMIT_WINDOW = 60.0  # seconds
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +56,24 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Per-IP rate limiting middleware (60 req/min)
+    @app.middleware("http")
+    async def rate_limit(request: Request, call_next):
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        window = _rate_buckets[client_ip]
+        # Drop timestamps outside the window
+        _rate_buckets[client_ip] = [t for t in window if now - t < RATE_LIMIT_WINDOW]
+        if len(_rate_buckets[client_ip]) >= RATE_LIMIT_MAX:
+            retry_after = int(RATE_LIMIT_WINDOW - (now - _rate_buckets[client_ip][0]))
+            return JSONResponse(
+                status_code=429,
+                headers={"Retry-After": str(max(retry_after, 1))},
+                content={"error": {"code": "RATE_LIMIT_EXCEEDED", "message": f"Max {RATE_LIMIT_MAX} requests per minute"}},
+            )
+        _rate_buckets[client_ip].append(now)
+        return await call_next(request)
 
     # Structured request logging middleware
     @app.middleware("http")
