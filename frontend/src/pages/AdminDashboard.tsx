@@ -16,10 +16,10 @@ interface QueueItem {
 interface Metrics {
   total_listings: number;
   live_listings: number;
-  pending_review: number;
+  pending_review_listings: number;
   verification_rate_pct: number;
   fraud_catch_rate_pct: number;
-  stale_listings: number;
+  stale_listing_count: number;
 }
 
 export default function AdminDashboard() {
@@ -68,10 +68,10 @@ export default function AdminDashboard() {
             {[
               { label: "Total Listings", value: metricsData.total_listings },
               { label: "Live", value: metricsData.live_listings },
-              { label: "Pending Review", value: metricsData.pending_review, warn: metricsData.pending_review > 0 },
+              { label: "Pending Review", value: metricsData.pending_review_listings, warn: metricsData.pending_review_listings > 0 },
               { label: "Verification Rate", value: `${metricsData.verification_rate_pct?.toFixed(1)}%` },
               { label: "Fraud Catch Rate", value: `${metricsData.fraud_catch_rate_pct?.toFixed(1)}%` },
-              { label: "Stale Listings", value: metricsData.stale_listings, warn: metricsData.stale_listings > 0 },
+              { label: "Stale Listings", value: metricsData.stale_listing_count, warn: metricsData.stale_listing_count > 0 },
             ].map(({ label, value, warn }) => (
               <div
                 key={label}
