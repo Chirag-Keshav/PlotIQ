@@ -1,15 +1,45 @@
 """Listings API routes — CRUD, score, price, POIs, growth signals, report."""
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 
-from app.core.auth import get_current_user, get_optional_user, UserClaims
+from app.core.auth import get_current_user, UserClaims
 from app.core.database import get_db
 from app.schemas.listing import ListingCreate, ListingSummary, ListingDetail, ConfidenceBreakdown
+from app.models.listing import Listing, User
 
 router = APIRouter()
+
+SELLER_RATE_LIMIT = 5
+RATE_LIMIT_WINDOW_HOURS = 24
+
+
+async def _check_seller_rate_limit(db: AsyncSession, user_id: str) -> None:
+    """Raise HTTP 429 if the seller has created >= 5 listings in the last 24 hours."""
+    stmt = select(User).where(User.clerk_user_id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+    if not user:
+        return
+
+    window_start = datetime.now(timezone.utc) - timedelta(hours=RATE_LIMIT_WINDOW_HOURS)
+    count_stmt = (
+        select(func.count())
+        .select_from(Listing)
+        .where(Listing.seller_id == user.id)
+        .where(Listing.created_at >= window_start)
+    )
+    count = await db.scalar(count_stmt)
+    if count is not None and count >= SELLER_RATE_LIMIT:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded: max {SELLER_RATE_LIMIT} listings per {RATE_LIMIT_WINDOW_HOURS} hours",
+            headers={"Retry-After": str(RATE_LIMIT_WINDOW_HOURS * 3600)},
+        )
 
 
 @router.get("/listings", response_model=dict)
@@ -51,6 +81,16 @@ async def create_listing(
     user: UserClaims = Depends(get_current_user),
 ):
     """Create a new listing (authenticated sellers only)."""
+    # Explicit TOS check — return 400, not 422
+    if not payload.tos_accepted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "TOS_NOT_ACCEPTED", "message": "Terms of Service must be accepted"},
+        )
+
+    # Rate limiting: 5 listings per seller per 24 hours
+    await _check_seller_rate_limit(db, user.user_id)
+
     from app.services.listing_service import ListingService
     service = ListingService(db)
     listing_id = await service.create_listing(payload, user.user_id)
@@ -120,7 +160,5 @@ async def report_listing(
     user: UserClaims = Depends(get_current_user),
 ):
     """Submit a grievance/takedown report for a listing."""
-    import uuid as uuid_lib
-    report_id = uuid_lib.uuid4()
-    # In production: insert grievance record, notify ops team
+    report_id = uuid.uuid4()
     return {"report_id": str(report_id), "status": "received"}
