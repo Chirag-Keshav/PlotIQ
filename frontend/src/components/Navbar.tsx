@@ -1,8 +1,15 @@
+import { Link, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
+const NAV_LINKS = [
+  { label: "Discover", to: "/discover" },
+  { label: "List a Plot", to: "/sell" },
+  { label: "Legal", to: "/legal" },
+];
+
 export default function Navbar() {
-  const navItems = ["Discovery", "Intelligence", "Verification", "Growth"];
+  const { pathname } = useLocation();
 
   return (
     <motion.nav
@@ -11,19 +18,21 @@ export default function Navbar() {
       transition={{ duration: 0.8, ease: "easeOut" }}
       className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-7xl z-50 px-6 py-4 glass-nav flex items-center justify-between"
     >
-      <div className="flex items-center gap-2">
+      <Link to="/" className="flex items-center gap-2">
         <span className="text-2xl font-bold tracking-tighter text-white">PlotIQ</span>
-      </div>
+      </Link>
 
       <div className="hidden md:flex items-center gap-8">
-        {navItems.map((item) => (
-          <a
-            key={item}
-            href={`#${item.toLowerCase()}`}
-            className="text-sm font-medium text-white/60 hover:text-white transition-colors"
+        {NAV_LINKS.map(({ label, to }) => (
+          <Link
+            key={to}
+            to={to}
+            className={`text-sm font-medium transition-colors ${
+              pathname === to ? "text-white" : "text-white/60 hover:text-white"
+            }`}
           >
-            {item}
-          </a>
+            {label}
+          </Link>
         ))}
       </div>
 
@@ -36,17 +45,15 @@ export default function Navbar() {
           </SignInButton>
         </SignedOut>
         <SignedIn>
-          <UserButton 
+          <UserButton
             appearance={{
-              elements: {
-                avatarBox: "w-9 h-9 border border-white/20"
-              }
+              elements: { avatarBox: "w-9 h-9 border border-white/20" },
             }}
           />
         </SignedIn>
-        <button className="px-5 py-2 bg-white text-black text-sm font-bold rounded-lg hover:scale-105 transition-transform">
+        <Link to="/discover" className="btn-primary text-sm">
           Start Discovery
-        </button>
+        </Link>
       </div>
     </motion.nav>
   );
