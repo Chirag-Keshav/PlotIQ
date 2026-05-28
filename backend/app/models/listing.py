@@ -6,10 +6,11 @@ from typing import Optional
 from sqlalchemy import (
     UUID, BigInteger, Boolean, Column, Date, DateTime, Float,
     ForeignKey, Integer, Numeric, SmallInteger, String, Text,
-    func, Computed,
+    func, Computed, event,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
+from sqlalchemy.exc import StatementError
 
 from app.core.database import Base
 
@@ -104,6 +105,17 @@ class GrowthSignal(Base):
     center_lat = Column(Float, nullable=True)
     center_lng = Column(Float, nullable=True)
     radius_km = Column(Float, default=5.0)  # approximate coverage radius
+
+
+@event.listens_for(GrowthSignal, "before_insert")
+@event.listens_for(GrowthSignal, "before_update")
+def _validate_growth_signal(mapper, connection, target: GrowthSignal):
+    """Req 13.7 / Task 16.3: announced signals must have a source_url."""
+    if target.status == "announced" and not target.source_url:
+        raise ValueError(
+            f"GrowthSignal validation error: status='announced' requires source_url "
+            f"(title={target.title!r})"
+        )
 
 
 class FraudSignal(Base):
