@@ -29,7 +29,7 @@ export const useMapStore = create<MapState>((set) => ({
   setBounds: (bounds) => set({ bounds }),
   setCenter: (center) => set({ center }),
   setZoom: (zoom) => set({ zoom }),
-  setFilters: (filters) => set({ activeFilters: filters }),
+  setFilters: (filters) => set((state) => ({ activeFilters: { ...state.activeFilters, ...filters } })),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSelectedListing: (id) => set({ selectedListingId: id }),
   toggleComparison: (id) => set((state) => {
