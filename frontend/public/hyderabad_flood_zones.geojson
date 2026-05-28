@@ -1,0 +1,67 @@
+{
+  "type": "FeatureCollection",
+  "name": "Hyderabad Flood Hazard Zones",
+  "source": "NDMA / GHMC indicative flood-prone areas (POC representative data)",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "zone": "High Risk", "description": "Musi River floodplain — Chaderghat to Nayapul" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [78.4700, 17.3700], [78.5100, 17.3700],
+          [78.5100, 17.3550], [78.4700, 17.3550],
+          [78.4700, 17.3700]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "zone": "High Risk", "description": "Hussain Sagar lake overflow zone" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [78.4550, 17.4300], [78.4800, 17.4300],
+          [78.4800, 17.4100], [78.4550, 17.4100],
+          [78.4550, 17.4300]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "zone": "Medium Risk", "description": "Patancheru industrial area low-lying zone" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [78.1500, 17.5200], [78.2000, 17.5200],
+          [78.2000, 17.4900], [78.1500, 17.4900],
+          [78.1500, 17.5200]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "zone": "Medium Risk", "description": "Ibrahimpatnam seasonal flood zone near Aler road" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [78.6800, 17.2600], [78.7300, 17.2600],
+          [78.7300, 17.2300], [78.6800, 17.2300],
+          [78.6800, 17.2600]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "zone": "Low Risk", "description": "Ghatkesar low-lying agricultural belt" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [78.5800, 17.4200], [78.6200, 17.4200],
+          [78.6200, 17.3900], [78.5800, 17.3900],
+          [78.5800, 17.4200]
+        ]]
+      }
+    }
+  ]
+}

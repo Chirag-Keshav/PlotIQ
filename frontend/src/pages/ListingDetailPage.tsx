@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { Flag } from "lucide-react";
+import api from "../lib/api";
+import { useAuth } from "@clerk/clerk-react";
 import { useListing } from "../hooks/useListing";
 import {
   useListingScore,
@@ -32,8 +36,17 @@ export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("overview");
 
+  const { isSignedIn } = useAuth();
+  const [reportSent, setReportSent] = useState(false);
+
   const { data: listing, isLoading } = useListing(id ?? null);
   const { data: scoreData } = useListingScore(id ?? null);
+
+  const reportMutation = useMutation({
+    mutationFn: () =>
+      api.post(`/listings/${id}/report`, { reason: "user_report", description: "Reported by user" }),
+    onSuccess: () => setReportSent(true),
+  });
   const { data: priceData, isLoading: priceLoading } = useListingPriceEstimate(id ?? null);
   const { data: poisData, isLoading: poisLoading } = useListingPOIs(id ?? null);
   const { data: growthData, isLoading: growthLoading } = useListingGrowthSignals(id ?? null);
@@ -69,6 +82,24 @@ export default function ListingDetailPage() {
           listing_status={listing.listing_status}
           created_at={listing.created_at}
         />
+
+        {/* Report listing */}
+        {isSignedIn && (
+          <div className="mb-4 flex justify-end">
+            {reportSent ? (
+              <span className="text-xs text-green-400">✓ Report submitted</span>
+            ) : (
+              <button
+                onClick={() => reportMutation.mutate()}
+                disabled={reportMutation.isPending}
+                className="flex items-center gap-1.5 text-xs text-white/30 hover:text-red-400 transition-colors disabled:opacity-50"
+              >
+                <Flag className="h-3 w-3" />
+                {reportMutation.isPending ? "Reporting..." : "Report this listing"}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Tab nav */}
         <div className="flex gap-1 overflow-x-auto border-b border-white/10 mb-8 pb-px">

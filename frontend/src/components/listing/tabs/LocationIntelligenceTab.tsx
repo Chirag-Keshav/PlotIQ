@@ -147,9 +147,24 @@ export default function LocationIntelligenceTab({ pois, isLoading, lat, lng }: L
         </div>
       ) : null}
 
-      {/* Flood risk overlay notice */}
-      <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-300/70">
-        Flood risk overlay uses NDMA Hyderabad hazard zone data. Consult HMDA for authoritative flood maps.
+      {/* Flood risk overlay legend */}
+      <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg space-y-2">
+        <p className="text-xs font-semibold text-blue-300">Flood Risk Overlay (NDMA indicative zones)</p>
+        <div className="flex flex-wrap gap-3 text-xs">
+          {[
+            { color: "bg-red-500/60", label: "High Risk" },
+            { color: "bg-yellow-500/60", label: "Medium Risk" },
+            { color: "bg-green-500/60", label: "Low Risk" },
+          ].map(({ color, label }) => (
+            <span key={label} className="flex items-center gap-1.5 text-white/60">
+              <span className={`h-3 w-3 rounded-sm inline-block ${color}`} />
+              {label}
+            </span>
+          ))}
+        </div>
+        <p className="text-xs text-blue-300/60">
+          Indicative only. Consult HMDA / GHMC for authoritative flood maps before purchase.
+        </p>
       </div>
     </div>
   );
