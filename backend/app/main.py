@@ -1,4 +1,5 @@
 """FastAPI application factory with middleware, routers, and lifespan."""
+import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -32,6 +33,15 @@ async def lifespan(app: FastAPI):
             logger.error(f"Startup check FAILED: {dep} = {status_val}")
         else:
             logger.info(f"Startup check OK: {dep}")
+
+    # Load or train price model
+    try:
+        import sys, os
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        from ai.price_model.train import load_or_train
+        await asyncio.to_thread(load_or_train)
+    except Exception as exc:
+        logger.warning(f"Price model startup load skipped: {exc}")
 
     yield
 
