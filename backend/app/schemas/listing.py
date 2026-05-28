@@ -62,6 +62,17 @@ class ListingSummary(BaseModel):
     lng: float
 
 
+class DocumentSummary(BaseModel):
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    doc_type: str
+    analysis_status: str
+    ai_analysis: Optional[dict] = None
+    failure_reason: Optional[str] = None
+    uploaded_at: Optional[datetime] = None
+
+
 class ListingDetail(ListingSummary):
     description: Optional[str] = None
     use_type: Optional[str] = None
@@ -70,6 +81,7 @@ class ListingDetail(ListingSummary):
     verification_tier: str = "unverified"
     confidence_breakdown: Optional[dict] = None
     growth_signals: list[GrowthSignalSummary] = []
+    documents: list[DocumentSummary] = []
     created_at: Optional[datetime] = None
     last_confirmed_at: Optional[datetime] = None
 
